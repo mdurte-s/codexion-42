@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:52 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/20 18:30:56 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/21 19:05:46 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,5 +33,6 @@ void	*monitor_routine(void *arg)
 	// 	}
 	// 	usleep(500);
 	// }
+	printf("\nmonitor routine [OK]");
 	return (NULL);
 }

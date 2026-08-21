@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/20 18:04:38 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/21 17:01:52 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,8 +81,6 @@ void	assign_dongles(t_sim *sim);
 
 void	*monitor_routine(void *arg);
 
-
-
-
+void	destroy_sim(t_sim *sim);
 
 #endif

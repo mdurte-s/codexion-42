@@ -5,7 +5,7 @@ NAME		= codexion
 # --- Flags ------------------------------------------------------------------ #
 
 CC			= cc
-CFLAGS		= -Wall -Wextra -Werror -pthread
+CFLAGS		= -Wall -Wextra -Werror -pthread -g
 RM			= rm -f
 
 # ---- Paths ----------------------------------------------------------------- #

@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/20 18:29:24 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/21 19:05:05 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,5 +24,6 @@ void	*coder_routine(void *arg)
 	// 	refactor(coder);
 	// 	compile(coder);
 	// }
+	printf("\ncoder routine [OK]");
 	return (NULL);
 }

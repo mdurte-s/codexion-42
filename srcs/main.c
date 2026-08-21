@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:46 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/20 18:35:23 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/21 17:36:45 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,30 +43,35 @@ int	main(int argc, char **argv)
 {
 	t_sim	sim;
 
+	printf("\n>>> parsing  ...");
 	if (!parser(argc, argv, &sim))
-		return (printf("\nERROR"), 1);
+		return (1);
+	printf("\n>>> init sim ...");
 	if (!init_sim(&sim))
 		return (1);
 	// create the monitor thread, passing the simulation state to it
+	printf("\n>>> pthread create ...");
 	if (pthread_create(
         &sim.monitor_thread,	// store the id of the newly created thread
         NULL,					// use the default thread attributes
         monitor_routine,		// function executed by the new thread
         &sim))					// pass the simulation structure to the thread
 	{
-    	// destroy_sim(&sim); // clean up the simulation if thread creation fails
+    	destroy_sim(&sim);
     	return (printf("Failed to create monitor"), 1);
 	}
+	printf("\n>>> init threads ...");
 	if (!init_threads(&sim))
 	{
 		// stop_simulation(&sim); // stop the simulation if the coder threads could not be created
 		// pthread_join(sim.monitor_thread, NULL); // wait for the monitor thread to finish
-		// destroy_sim(&sim); // free all resources used by the simulation
+		destroy_sim(&sim);
 		return (printf("Failed to create coder threads"), 1);
 	}
 	// join_threads(&sim); // wait for all coder threads to finish
 	// stop_simulation(&sim); // stop the simulation once all coder threads have finished
 	// pthread_join(sim.monitor_thread, NULL); // wait for the monitor thread to finish
-	// destroy_sim(&sim); // free all resources used by the simulation
+	destroy_sim(&sim);
+	printf("\nfinitooo pum pum pum!");
 	return (0);
 }

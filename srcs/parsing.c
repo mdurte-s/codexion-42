@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:14 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/20 17:30:10 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/21 19:07:56 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,9 +70,9 @@ int	parser(int argc, char **argv, t_sim *sim)
 		save_data(i, atoi(argv[i]), sim);
 	}
 	if (ft_strcmp(argv[i], "fifo") == 0)
-		return (sim->scheduler = FIFO, 1);
+		return (sim->scheduler = FIFO, printf("\nparsing [KO]"), 1);
 	else if (ft_strcmp(argv[i], "edf") == 0)
-		return (sim->scheduler = EDF, 1);
+		return (sim->scheduler = EDF, printf("\nparsing [KO]"), 1);
 	else
-		return (0);
+		return (printf("\nparsing [OK]"), 0);
 }
