@@ -6,27 +6,20 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:14 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/18 11:59:15 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/20 17:30:10 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
 
-int	double_strcmp(char *s1, char *s2, char *s3)
+int	ft_strcmp(char *s1, char *s2)
 {
 	int	i;
 
 	i = 0;
 	while (s1[i] && s1[i] == s2[i])
 		i++;
-	if (s1[i] == '\0' && s2[i] == '\0')
-		return (1);
-	i = 0;
-	while (s1[i] && s1[i] == s3[i])
-		i++;
-	if (s1[i] == '\0' && s3[i] == '\0')
-		return (1);
-	return (0);
+	return (s1[i] - s2[i]);
 }
 
 int	is_positive_integer(char *str)
@@ -69,20 +62,17 @@ int	parser(int argc, char **argv, t_sim *sim)
 	if (!(argc == 9))
 		return (0);
 	i = 0;
-	while (++i < argc)
+	while (++i < argc - 1)
 	{
-		if (i == 8)
-		{
-			if (double_strcmp(argv[i], "fifo", "edf"))
-				sim->scheduler = argv[i];
-			else
-				return (0);
-			break ;
-		}
 		value = atoi(argv[i]);
 		if (!is_positive_integer(argv[i]) || value <= 0)
 			return (0);
 		save_data(i, atoi(argv[i]), sim);
 	}
-	return (1);
+	if (ft_strcmp(argv[i], "fifo") == 0)
+		return (sim->scheduler = FIFO, 1);
+	else if (ft_strcmp(argv[i], "edf") == 0)
+		return (sim->scheduler = EDF, 1);
+	else
+		return (0);
 }

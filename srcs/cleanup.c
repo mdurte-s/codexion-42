@@ -6,7 +6,10 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:43:06 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/17 15:43:07 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/08/20 18:27:44 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "../includes/codexion.h"
+
+// int destroy_sim( t_sim *sim);

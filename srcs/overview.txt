@@ -1,0 +1,45 @@
+                    main()
+                      │
+                      ▼
+                parse_args()
+                      │
+                      ▼
+                  init_sim()
+                 /         \
+                /           \
+        init_dongles()   init_coders()
+                \           /
+                 \         /
+                  assign_dongles()
+                      │
+                      ▼
+              create monitor
+                      │
+                      ▼
+              create N coders
+                 /    |    \
+                /     |     \
+               ▼      ▼      ▼
+           coder 0 coder 1 coder 2 ...
+               │      │      │
+               └──────┼──────┘
+                      ▼
+                  simulation
+                      │
+               monitor detects
+               termination
+                      │
+                      ▼
+              stop_simulation()
+                      │
+                      ▼
+                join coders
+                      │
+                      ▼
+               join monitor
+                      │
+                      ▼
+                 destroy_sim()
+                      │
+                      ▼
+                    exit
