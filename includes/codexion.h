@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/21 17:01:52 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/01 14:05:20 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,73 +14,93 @@
 # define CODEXION_H
 
 # include <pthread.h>
-# include <sys/time.h>
-# include <time.h>
-# include <unistd.h>
-# include <stdlib.h>
 # include <stdio.h>
+# include <stdlib.h>
 # include <string.h>
+# include <sys/time.h>
+# include <unistd.h>
 
-typedef struct s_sim	t_sim;
-
-typedef enum e_scheduler
-{
+typedef enum e_scheduler {
 	FIFO,
 	EDF
 }	t_scheduler;
 
-typedef struct s_dongle
-{
+typedef struct s_coder	t_coder;
+typedef struct s_sim	t_sim;
+
+typedef struct s_pq {
+	t_coder	**heap;
+	int		capacity;
+	int		size;
+}	t_pq;
+
+typedef struct s_dongle {
+	int				id;
 	pthread_mutex_t	mutex;
-	int				available;
+	pthread_cond_t	cond;
+	long long		last_released_time;
+	t_pq			*waiting_pq;
 }	t_dongle;
 
-typedef struct s_coder
-{
-	int				id;
-	int				compile_count;
-	long			last_compile_start;
-	pthread_t		thread;
-	t_sim			*sim;
-	t_dongle		*left_dongle;
-	t_dongle		*right_dongle;
-}	t_coder;
+struct s_coder {
+	int			id;
+	pthread_t	thread;
+	int			compiles_count;
+	long long	last_compile_start;
+	long long	request_time;
 
-typedef struct s_sim
-{
+	t_dongle	*left_dongle;
+	t_dongle	*right_dongle;
+
+	t_sim		*sim;
+};
+
+struct s_sim {
 	int				number_of_coders;
-	int				time_to_burnout;
-	int				time_to_compile;
-	int				time_to_debug;
-	int				time_to_refactor;
+	long long		time_to_burnout;
+	long long		time_to_compile;
+	long long		time_to_debug;
+	long long		time_to_refactor;
 	int				number_of_compiles_required;
-	int				dongle_cooldown;
-
+	long long		dongle_cooldown;
 	t_scheduler		scheduler;
 
-	int				finished;
-	pthread_mutex_t	state_mutex;
+	long long		start_time;
+	int				stop_simulation;
+	pthread_mutex_t	stop_mutex;
+	pthread_mutex_t	log_mutex;
 
 	t_coder			*coders;
 	t_dongle		*dongles;
-
 	pthread_t		monitor_thread;
-}	t_sim;
+};
 
-int		parser(int argc, char **argv, t_sim *sim);
+// Utils
+long long	get_time_in_ms(void);
+int			sim_is_stopped(t_sim *sim);
+void		set_stop_simulation(t_sim *sim);
+void		print_log(t_coder *coder, const char *message);
+void		smart_sleep(long long duration_ms, t_sim *sim);
+int			ft_atoi(const char *str);
 
-t_sim	*get_sim(t_sim *init);
-int		init_sim(t_sim *sim);
-int		init_threads(t_sim *sim);
+// Priority Queue / Scheduler
+t_pq		*create_priority_queue(int capacity);
+void		free_priority_queue(t_pq *pq);
+void		heap_push(t_pq *pq, t_coder *coder, t_sim *sim);
+t_coder		*heap_pop(t_pq *pq, t_sim *sim);
+t_coder		*heap_peek(t_pq *pq);
+void		heap_remove(t_pq *pq, t_coder *coder);
 
-void	*coder_routine(void *arg);
+// Dongle Operations
+int			acquire_dongles(t_coder *coder);
+void		release_dongles(t_coder *coder);
 
-void	unlock_dongles(t_coder *coder);
-void	lock_dongles(t_coder *coder);
-void	assign_dongles(t_sim *sim);
+// Routines
+void		*coder_routine(void *arg);
+void		*monitor_routine(void *arg);
 
-void	*monitor_routine(void *arg);
-
-void	destroy_sim(t_sim *sim);
+// Init & Cleanup
+int			init_simulation(t_sim *sim);
+void		cleanup_simulation(t_sim *sim);
 
 #endif

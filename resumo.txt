@@ -55,3 +55,37 @@ object referenced by mutex; the mutex object becomes, in effect,
 uninitialized. An implementation may cause pthread_mutex_destroy()
 to set the object referenced by mutex to an invalid value.
 int pthread_mutex_destroy(pthread_mutex_t *mutex);
+
+
+1. Concorrência e Prevenção de Deadlocks
+P: Como é que o teu código garante que nunca ocorre um Deadlock entre os coders ao tentarem pegar nos dongles?
+R: O deadlock é evitado através do quebrar da condição de Hold and Wait / Circular Wait (Condições de Coffman). Os coders adquirem sempre o dongle com o menor ID/endereço de memória primeiro, e só depois tentam bloquear o dongle com o maior ID/endereço. Desta forma, é impossível que dois coders vizinhos fiquem a aguardar circularmente um pelo outro (ex: Coder 1 com Dongle A a esperar por B, e Coder 2 com Dongle B a esperar por A).
+
+P: O que acontece na situação em que a simulação tem apenas 1 coder?
+R: Como existe apenas 1 coder, só existe 1 dongle na mesa. A rotina do coder deteta este caso limite, faz lock do único dongle disponível e entra num ciclo de espera. Como ele necessita de 2 dongles para compilar, fica a aguardar até que a thread do monitor detete o burnout (em time_to_burnout ms) e encerre a simulação de forma limpa.
+
+
+2. Algoritmos de Escalonamento e Min-Heap
+P: Como funciona a Fila de Prioridade (Min-Heap) e como altera o comportamento entre FIFO e EDF?
+R: Cada dongle tem a sua própria Min-Heap privada protegida pelo respetivo mutex. Quando um coder quer um dongle, insere-se na Heap e entra em pthread_cond_wait.
+FIFO (First In, First Out): A prioridade é dada ao coder com menor timestamp de requisição (request_time).
+EDF (Earliest Deadline First): A prioridade é dada ao coder com a deadline de burnout mais próxima (last_compile_start + time_to_burnout). Caso haja empate nas deadlines, a ordenação desempata deterministicamente pelo ID do coder.
+
+P: Porque é que usaste uma Min-Heap em vez de uma lista ligada simples ou array?
+R: A Min-Heap garante uma complexidade de inserção (O(logN)) e de remoção do topo (O(logN)), além de um acesso imediato ao elemento de maior prioridade (O(1)) com a função heap_peek. Isto garante um desempenho leve e determinístico mesmo que a simulação corra com dezenas ou centenas de threads.
+
+
+3. Cooldown e Sincronização
+P: Como garantes que o dongle_cooldown é respeitado sem fazer busy waiting (consumo excessivo de CPU)?
+R: Quando um coder liberta um dongle, atualiza a variável last_released_time do dongle e chama pthread_cond_broadcast. Um coder que esteja à espera na fila só pode obter o dongle se cumprirem duas condições no loop do pthread_cond_wait:
+Ser o elemento no topo da Min-Heap (heap_peek(waiting_pq) == coder).
+O tempo decorrido desde a libertação ser maior ou igual a dongle_cooldown (current_time - last_released_time >= cooldown).
+Se não cumprir ambas as condições, volta a adormecer na variável de condição (pthread_cond_wait), libertando o processador para outras threads.
+
+
+4. Monitorização e Terminação Limpa
+P: O subject exige que o log de burnout seja impresso com uma precisão máxima de 10 ms. Como garantes este requisito?
+R: A thread de monitorização executa um loop contínuo com pausas curtas de 1 ms (usleep(1000)). A cada iteração, ela verifica se tempo_atual - last_compile_start > time_to_burnout para cada coder. Assim que uma infração é detetada, o monitor faz lock do log_mutex, imprime a mensagem de burnout, ativa a flag stop_simulation e faz pthread_cond_broadcast em todos os dongles para desbloquear todas as threads adormecidas, permitindo que terminem os seus ciclos e a simulação faça join de todas as threads limpadamente.
+
+P: Como é evitada a corrupção de mensagens e data races nos logs de saída?
+R: Toda e qualquer escrita no stdout é envolvida por um bloqueio exclusivo do log_mutex. Adicionalmente, a função print_log verifica a flag stop_simulation com o stop_mutex antes de imprimir. Isto garante que nenhuma mensagem de estado seja emitida após a simulação ter parado ou após a mensagem de burnout ter sido apresentada.

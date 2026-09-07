@@ -16,22 +16,18 @@ OBJDIR			= objs
 
 # --- Sources ---------------------------------------------------------------- #
 
-SRCS	= ${SRCDIR}/cleanup.c \
-		  ${SRCDIR}/coder.c \
+SRCS	= ${SRCDIR}/coder.c \
 		  ${SRCDIR}/dongle.c \
 		  ${SRCDIR}/init.c \
-		  ${SRCDIR}/logging.c \
 		  ${SRCDIR}/main.c \
 		  ${SRCDIR}/monitor.c \
 		  ${SRCDIR}/parsing.c \
 		  ${SRCDIR}/scheluder.c \
-		  ${SRCDIR}/time.c
+		  ${SRCDIR}/utils.c
 
 OBJS		= $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
-
 # --- Rules ------------------------------------------------------------------ #
-
 
 all:		$(NAME)
 
