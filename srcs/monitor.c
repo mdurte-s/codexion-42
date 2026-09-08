@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:52 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/01 14:03:24 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/08 14:53:08 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,8 @@ void	*monitor_routine(void *arg)
 			}
 			if (sim->number_of_compiles_required != -1)
 			{
-				if (sim->coders[i].compiles_count < sim->number_of_compiles_required)
+				if (sim->coders[i].compiles_count
+					< sim->number_of_compiles_required)
 					all_completed = 0;
 			}
 			pthread_mutex_unlock(&sim->stop_mutex);

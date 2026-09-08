@@ -23,6 +23,7 @@ SRCS	= ${SRCDIR}/coder.c \
 		  ${SRCDIR}/monitor.c \
 		  ${SRCDIR}/parsing.c \
 		  ${SRCDIR}/scheluder.c \
+		  ${SRCDIR}/heap.c \
 		  ${SRCDIR}/utils.c
 
 OBJS		= $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)

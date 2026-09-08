@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:43:00 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/01 14:01:50 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/08 15:55:26 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,27 +61,4 @@ void	smart_sleep(long long duration_ms, t_sim *sim)
 			break ;
 		usleep(500);
 	}
-}
-
-int	ft_atoi(const char *str)
-{
-	long	res;
-	int		sign;
-
-	res = 0;
-	sign = 1;
-	while (*str == ' ' || (*str >= 9 && *str <= 13))
-		str++;
-	if (*str == '-' || *str == '+')
-	{
-		if (*str == '-')
-			sign = -1;
-		str++;
-	}
-	while (*str >= '0' && *str <= '9')
-	{
-		res = res * 10 + (*str - '0');
-		str++;
-	}
-	return ((int)(res * sign));
 }

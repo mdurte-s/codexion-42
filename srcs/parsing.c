@@ -6,13 +6,13 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:14 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/08/26 18:00:14 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/08 14:53:53 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
 
-int	ft_strcmp(char *s1, char *s2)
+static int	ft_strcmp(char *s1, char *s2)
 {
 	int	i;
 
@@ -22,14 +22,14 @@ int	ft_strcmp(char *s1, char *s2)
 	return (s1[i] - s2[i]);
 }
 
-int	ft_isdigit(int c)
+static int	ft_isdigit(int c)
 {
 	if ('0' <= c && c <= '9')
 		return (1);
 	return (0);
 }
 
-int	ft_atoi_adapted(const char *str)
+static int	ft_atoi_adapted(const char *str)
 {
 	int			i;
 	long long	n;
@@ -37,7 +37,7 @@ int	ft_atoi_adapted(const char *str)
 	i = 0;
 	n = 0;
 	if (!str || !str[0])
-        return (-1);
+		return (-1);
 	while (ft_isdigit(str[i]))
 	{
 		n = n * 10 + str[i] - '0';
@@ -50,7 +50,7 @@ int	ft_atoi_adapted(const char *str)
 	return ((int)n);
 }
 
-void	save_data(int index, int data, t_sim *sim)
+static void	save_data(int index, int data, t_sim *sim)
 {
 	if (index == 1)
 		sim->number_of_coders = data;

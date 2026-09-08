@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/01 14:03:07 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/08 10:56:33 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,16 +36,13 @@ void	*coder_routine(void *arg)
 		coder->last_compile_start = get_time_in_ms();
 		coder->compiles_count++;
 		pthread_mutex_unlock(&coder->sim->stop_mutex);
-
 		print_log(coder, "is compiling");
 		smart_sleep(coder->sim->time_to_compile, coder->sim);
 		release_dongles(coder);
-
 		if (sim_is_stopped(coder->sim))
 			break ;
 		print_log(coder, "is debugging");
 		smart_sleep(coder->sim->time_to_debug, coder->sim);
-
 		if (sim_is_stopped(coder->sim))
 			break ;
 		print_log(coder, "is refactoring");
