@@ -33,7 +33,7 @@ Run the executable with the 8 mandatory positional arguments:
 - **time_to_compile (ms):** Time required to compile while holding two dongles.
 - **time_to_debug (ms):** Time spent debugging.
 - **time_to_refactor (ms):** Time spent refactoring.
-- **number_of_compiles_required:** Required compiles per coder before simulation stops (-1 or positive integer).
+- **number_of_compiles_required:** Required compiles per coder before simulation stops.
 - **dongle_cooldown (ms):** Time a dongle remains unavailable after being released.
 - **scheduler:** Arbitration policy (`fifo` or `edf`).
 
