@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:14 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:52:58 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/10 11:23:13 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,5 +90,5 @@ int	parser(int argc, char **argv, t_sim *sim)
 	else if (ft_strcmp(argv[i], "edf") == 0)
 		return (sim->scheduler = EDF, 0);
 	else
-		return (printf("\nparsing [KO]"), 1);
+		return (1);
 }

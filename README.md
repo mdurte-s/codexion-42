@@ -2,9 +2,9 @@
 
 ## Description
 
-**Codexion** is a multithreaded simulation project developed in C using POSIX threads and mutexes[cite: 1]. Inspired by classic concurrency problems like the Dining Philosophers, the simulation models a shared co-working space where multiple coders compete for limited USB dongles to compile quantum code[cite: 1].
+**Codexion** is a multithreaded simulation project written in C using POSIX threads and mutexes. Inspired by classic concurrency problems like the Dining Philosophers, the simulation models a shared co-working hub where multiple coders compete for limited USB dongles to compile quantum code.
 
-Each coder continuously loops through three main states: **compiling**, **debugging**, and **refactoring**. To perform a compilation, a coder must acquire two adjacent USB dongles (left and right) simultaneously. To make the problem more complex and realistic, access to dongles is managed by strict arbitration policies (**FIFO** or **EDF**) via custom priority queues, and dongles enforce a **cooldown period** after being released. A dedicated monitor thread ensures that if any coder fails to start compiling within `time_to_burnout` milliseconds, the simulation detects the burnout within 10 ms and terminates safely.
+Each coder continuously loops through three main states: **compiling**, **debugging**, and **refactoring**. To compile, a coder must hold two adjacent USB dongles (left and right) simultaneously. Access to dongles is managed by strict arbitration policies (**FIFO** or **EDF**) via custom priority queues (Min-Heap), and dongles enforce a **cooldown period** after being released. A dedicated monitor thread ensures that if any coder fails to start compiling within `time_to_burnout` milliseconds, the simulation detects the burnout within 10 ms and terminates safely.
 
 ## Instructions
 
@@ -12,53 +12,77 @@ Each coder continuously loops through three main states: **compiling**, **debugg
 
 The project includes a `Makefile` that compiles the source code with `-Wall -Wextra -Werror` and `-pthread` flags.
 
-- To compile the mandatory binary: make
-- Other available Makefile rules:
-make clean: Removes object files.
-make fclean: Removes object files and the codexion executable.
-make re: Recompiles the entire project.
+```bash
+make        # Compiles the codexion executable
+make clean  # Removes object files
+make fclean # Removes object files and the codexion executable
+make re     # Recompiles the entire project
+```
 
 ### Execution
-Run the executable with the required 8 arguments:
-```
+
+Run the executable with the 8 mandatory positional arguments:
+
+```bash
 ./codexion <number_of_coders> <time_to_burnout> <time_to_compile> <time_to_debug> <time_to_refactor> <number_of_compiles_required> <dongle_cooldown> <scheduler>
 ```
+
 **Arguments Detail:**
-- **number_of_coders:** Number of coders and shared dongles.
-- **time_to_burnout (ms):** Max time a coder can go without starting a compilation before burning out.
-- **time_to_compile (ms):** Duration of the compilation state.
-- **time_to_debug (ms):** Duration of the debugging state.
-- **time_to_refactor (ms):** Duration of the refactoring state.
-- **number_of_compiles_required:** Number of compilations each coder must perform for successful completion (or -1 for infinite).
-- **dongle_cooldown (ms):** Time a dongle remains unavailable after release.
-- **scheduler:** Dongle arbitration policy (fifo or edf).
+- **number_of_coders:** Number of coders sitting in a circle and total number of available dongles.
+- **time_to_burnout (ms):** Maximum time allowed since the start of the last compile before a coder burns out.
+- **time_to_compile (ms):** Time required to compile while holding two dongles.
+- **time_to_debug (ms):** Time spent debugging.
+- **time_to_refactor (ms):** Time spent refactoring.
+- **number_of_compiles_required:** Required compiles per coder before simulation stops (-1 or positive integer).
+- **dongle_cooldown (ms):** Time a dongle remains unavailable after being released.
+- **scheduler:** Arbitration policy (`fifo` or `edf`).
+
+> **Note:** Ensure plain ASCII text is used for arguments (avoid formatting software converting `fifo` into ligatures like `ﬁfo`).
 
 **Example Usage:**
-./codexion 4 800 200 100 100 5 10 edf
+```bash
+./codexion 5 3000 200 200 200 10 800 fifo
+./codexion 5 3000 200 200 200 10 800 edf
+```
 
-## Blocking Cases Handled
-The design addresses several classic concurrency risks and edge cases to guarantee safe execution and liveness:
-- **Deadlock Prevention:** To prevent circular wait scenarios (a core Coffman condition), coders always acquire dongles using a global resource ordering strategy. Regardless of left/right orientation, a coder locks the dongle with the lower memory address or ID first.
-- **Starvation & Fair Arbitration:** When multiple coders request the same dongle, requests are queued in a custom Min-Heap priority queue. Under fifo, access is granted based on request timestamps. Under edf (Earliest Deadline First), priority is given to the coder closest to burnout (last_compile_start + time_to_burnout), with a deterministic tie-breaker on coder IDs.
-- **Dongle Cooldown:** After a dongle is released, its release timestamp is updated. Any thread waking up to claim the dongle checks if current_time - last_released_time >= dongle_cooldown before taking ownership.
-- **Precise Burnout Detection:** A dedicated monitor thread polls coders' state every 1 ms. If a burnout occurs, it sets a global stop flag, broadcasts to all condition variables to unblock waiting threads, and prints the burnout log well within the required 10 ms tolerance.
-- **Log Serialization:** All state change logs are protected by a shared log_mutex to prevent line interleaving and ensure thread-safe output formatting.
-- **Single Coder Scenario:** Handled as a specific edge case where a single coder acquires the sole dongle and waits until burnout, avoiding deadlock or undefined behavior.
+---
 
-## Thread Synchronization Mechanisms
+## Blocking cases handled
 
-**pthread_mutex_t:**
-- **Dongle Mutexes:** Each dongle possesses a mutex protecting its internal state, including its cooldown timer and waiting queue.
-Stop Mutex (stop_mutex): Protects reading and writing the global stop_simulation flag and state data shared with the monitor thread.
-- **Log Mutex (log_mutex):** Ensures atomic console logging so timestamp outputs remain uncorrupted.
+This section details all the concurrency and synchronization challenges addressed in the simulation:
 
-**pthread_cond_t:**
-- Each dongle incorporates a condition variable (pthread_cond_wait, pthread_cond_broadcast).
-- Coders waiting for a dongle sleep on the condition variable and are awakened when the dongle is released or when the simulation stops, eliminating busy-waiting CPU spikes.
+1. **Deadlock Prevention & Coffman's Conditions:**
+   - **Resource Ordering:** To break circular wait, coders always attempt to acquire the lower dongle ID first (`min(left, right)`) before requesting the higher ID.
+   - **Hold-and-Wait Elimination:** If a coder successfully acquires the first dongle but fails to get the second immediately, it releases the first dongle and backs off (`usleep`) before retrying.
+2. **Starvation Prevention & Fair Arbitration:**
+   - Dongle request queues use custom priority queues (Min-Heap) to guarantee structured access without starvation.
+   - **FIFO:** Serves requests strictly in order of arrival (`request_time`).
+   - **EDF:** Serves the coder with the earliest burnout deadline (`last_compile_start + time_to_burnout`). Equal deadlines use coder ID as a deterministic tie-breaker.
+3. **Cooldown Handling:**
+   - Released dongles maintain a `last_released_time` timestamp. Ownership is granted only when `current_time - last_released_time >= dongle_cooldown`.
+4. **Precise Burnout Detection:**
+   - A dedicated monitor thread polls coder state. If a burnout occurs, it sets the global stop flag, prints the burnout log within 10 ms of occurrence, and broadcasts to all condition variables to unblock all worker threads.
+5. **Log Serialization:**
+   - All state transitions are logged through a dedicated `log_mutex` to prevent interleaved lines.
+6. **Single Coder Scenario:**
+   - Handled as an edge case where a single coder acquires the single available dongle and waits until the monitor thread cleanly detects burnout.
 
-**Custom Priority Queue (Min-Heap):**
-- A custom array-based Min-Heap implementation organizes queued threads for each dongle.
-- Threads sleep until signaled and only exit pthread_cond_wait when they reach the top of the heap and the cooldown time has elapsed.
+---
+
+## Thread synchronization mechanisms
+
+This implementation leverages the following POSIX threading primitives to coordinate access to shared resources:
+
+* **`pthread_mutex_t`:**
+  * **Dongle Mutexes (`dongle->mutex`):** Protect individual dongle states, arbitration priority queues, and cooldown timestamps.
+  * **Stop Mutex (`sim->stop_mutex`):** Protects thread-safe reads and writes of the `stop_simulation` flag and shared coder timestamps.
+  * **Log Mutex (`sim->log_mutex`):** Ensures atomic console output and prevents line interleaving.
+* **`pthread_cond_t`:**
+  * **Dongle Condition Variables (`dongle->cond`):** Signal waiting coders when a dongle is released or when a broadcast is triggered by the monitor upon simulation teardown.
+* **Custom Min-Heap Priority Queue:**
+  * Custom array-based priority queue providing $O(\log N)$ queue management per dongle to enforce FIFO and EDF arbitration deterministically without external library dependencies.
+
+---
 
 ## Resources
 
@@ -71,4 +95,4 @@ Stop Mutex (stop_mutex): Protects reading and writing the global stop_simulation
 In accordance with 42 curriculum requirements, AI assistance was utilized during this project for the following tasks:
 - **Architecture Review:** Brainstorming edge-case handling (e.g., deadlock prevention via ID ordering and condition variable broadcasts during teardown).
 - **Test Suite Development:** Generating automated bash scripting logic to evaluate argument parsing, burnout timing precision, and logging constraints.
-All AI-generated suggestions were manually tested, verified, and integrated with full understanding.
+All AI-generated suggestions were manually implemented, verified, and integrated with full understanding.
