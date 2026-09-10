@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 15:56:40 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 15:57:16 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:41:57 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,12 @@ void	heap_push(t_pq *pq, t_coder *coder, t_sim *sim)
 	}
 }
 
-t_coder	*heap_pop(t_pq *pq, t_sim *sim)
+static void	heap_sift_down(t_pq *pq, t_sim *sim)
 {
-	t_coder	*top;
 	t_coder	*tmp;
 	int		i;
 	int		smallest;
 
-	if (pq->size == 0)
-		return (NULL);
-	top = pq->heap[0];
-	pq->heap[0] = pq->heap[pq->size - 1];
-	pq->size--;
 	i = 0;
 	while ((2 * i + 1) < pq->size)
 	{
@@ -58,6 +52,18 @@ t_coder	*heap_pop(t_pq *pq, t_sim *sim)
 		pq->heap[smallest] = tmp;
 		i = smallest;
 	}
+}
+
+t_coder	*heap_pop(t_pq *pq, t_sim *sim)
+{
+	t_coder	*top;
+
+	if (pq->size == 0)
+		return (NULL);
+	top = pq->heap[0];
+	pq->heap[0] = pq->heap[pq->size - 1];
+	pq->size--;
+	heap_sift_down(pq, sim);
 	return (top);
 }
 

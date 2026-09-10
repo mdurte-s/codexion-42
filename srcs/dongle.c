@@ -6,14 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:37 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 14:47:12 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:28:52 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
-// Priority-based dongle acquisition and release functions. Manages waiting
-// queues via condition variables and handles dongle_cooldown logic.
 
 static int	acquire_single_dongle(t_coder *coder, t_dongle *dongle)
 {

@@ -6,15 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:18 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 14:52:13 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:28:34 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
-// Allocates memory, initializes mutexes/condition variables, sets up pointers
-// (including left/right dongle links), and destroys synchronization primitives
-// during cleanup.
 
 static int	init_dongles(t_sim *sim)
 {

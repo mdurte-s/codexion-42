@@ -6,14 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:46 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 15:49:49 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:28:41 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
-// Handles argument validation and parsing, triggers simulation setup,
-// and manages cleanup upon termination.
 
 int	main(int argc, char **argv)
 {

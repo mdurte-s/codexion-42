@@ -6,14 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:45 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 15:57:56 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/09 19:29:37 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
-// Custom priority queue (Min-Heap) implementation for FIFO and EDF policies.
-// Includes heap push, pop, remove, and priority comparison functions
 
 t_pq	*create_priority_queue(int capacity)
 {
