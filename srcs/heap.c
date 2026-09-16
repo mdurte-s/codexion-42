@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/08 15:56:40 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:41:57 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/16 16:02:11 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,20 @@ void	heap_push(t_pq *pq, t_coder *coder, t_sim *sim)
 
 	if (pq->size >= pq->capacity)
 		return ;
-	pq->heap[pq->size] = coder;
-	i = pq->size;
-	pq->size++;
-	while (i > 0 && comp_coders(pq->heap[i], pq->heap[(i - 1) / 2],
-			sim->scheduler, sim))
+	i = -1;
+	if (coder->compiles_count < coder->sim->number_of_compiles_required)
 	{
-		tmp = pq->heap[i];
-		pq->heap[i] = pq->heap[(i - 1) / 2];
-		pq->heap[(i - 1) / 2] = tmp;
-		i = (i - 1) / 2;
+		pq->heap[pq->size] = coder;
+		i = pq->size;
+		pq->size++;
+		while (i > 0 && comp_coders(pq->heap[i], pq->heap[(i - 1) / 2],
+				sim->scheduler, sim))
+		{
+			tmp = pq->heap[i];
+			pq->heap[i] = pq->heap[(i - 1) / 2];
+			pq->heap[(i - 1) / 2] = tmp;
+			i = (i - 1) / 2;
+		}
 	}
 }
 
@@ -85,7 +89,8 @@ void	heap_remove(t_pq *pq, t_coder *coder)
 		{
 			pq->heap[i] = pq->heap[pq->size - 1];
 			pq->size--;
-			return ;
+			return ;if (pq->size > 0)
+				heap_sift_down(pq, coder->sim);
 		}
 		i++;
 	}

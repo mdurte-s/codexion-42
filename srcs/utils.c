@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:43:00 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/08 15:55:26 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/16 15:36:14 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,7 +45,7 @@ void	print_log(t_coder *coder, const char *message)
 	if (!sim_is_stopped(coder->sim))
 	{
 		timestamp = get_time_in_ms() - coder->sim->start_time;
-		printf("%lld %d %s\n", timestamp, coder->id, message);
+		printf("%lld %d %s %d\n", timestamp, coder->id, message, coder->compiles_count);
 	}
 	pthread_mutex_unlock(&coder->sim->log_mutex);
 }
@@ -59,6 +59,6 @@ void	smart_sleep(long long duration_ms, t_sim *sim)
 	{
 		if (sim_is_stopped(sim))
 			break ;
-		usleep(500);
+		usleep(100);
 	}
 }

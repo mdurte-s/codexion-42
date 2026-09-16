@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:51:26 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/16 12:33:11 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,6 +43,7 @@ typedef struct s_dongle
 	pthread_cond_t		cond;
 	long long			last_released_time;
 	t_pq				*waiting_pq;
+	int					is_held;
 }						t_dongle;
 
 struct					s_coder
@@ -95,6 +96,8 @@ int						comp_coders(t_coder *a, t_coder *b, t_scheduler type,
 							t_sim *sim);
 t_pq					*create_priority_queue(int capacity);
 void					free_priority_queue(t_pq *pq);
+
+// Heap
 void					heap_push(t_pq *pq, t_coder *coder, t_sim *sim);
 t_coder					*heap_pop(t_pq *pq, t_sim *sim);
 t_coder					*heap_peek(t_pq *pq);

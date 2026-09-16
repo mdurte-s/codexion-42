@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:40:21 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/16 15:58:15 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,13 +43,18 @@ void	*coder_routine(void *arg)
 	{
 		print_log(coder, "has taken a dongle");
 		while (!sim_is_stopped(coder->sim))
-			usleep(1000);
+			;
 		return (NULL);
 	}
+	if (coder->id % 2 != 0)
+		smart_sleep(coder->sim->time_to_compile / 2, coder->sim);
 	while (!sim_is_stopped(coder->sim))
 	{
 		if (!coder_cycle(coder))
+		{
+			printf("\nfinito %d", coder->id);
 			break ;
+		}
 	}
 	return (NULL);
 }

@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:37 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/10 11:36:07 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/09/16 16:01:50 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,23 +18,25 @@ static int	try_acquire_single_dongle(t_coder *coder, t_dongle *dongle)
 	long long	elapsed;
 
 	pthread_mutex_lock(&dongle->mutex);
-	if (sim_is_stopped(coder->sim))
-	{
-		pthread_mutex_unlock(&dongle->mutex);
-		return (0);
-	}
-	coder->request_time = get_time_in_ms();
 	heap_push(dongle->waiting_pq, coder, coder->sim);
-	current_time = get_time_in_ms();
-	elapsed = current_time - dongle->last_released_time;
-	if (heap_peek(dongle->waiting_pq) == coder
-		&& elapsed >= coder->sim->dongle_cooldown)
+	while (!sim_is_stopped(coder->sim))
 	{
-		heap_pop(dongle->waiting_pq, coder->sim);
-		pthread_mutex_unlock(&dongle->mutex);
-		return (1);
+		current_time = get_time_in_ms();
+		elapsed = current_time - dongle->last_released_time;
+		if (dongle->is_held == 0 && heap_peek(dongle->waiting_pq) == coder)
+		{
+			if (elapsed >= coder->sim->dongle_cooldown)
+			{
+				heap_pop(dongle->waiting_pq, coder->sim);
+				dongle->is_held = 1;
+				pthread_mutex_unlock(&dongle->mutex);
+				return (1);
+			}
+		}
+		else
+			pthread_cond_wait(&dongle->cond, &dongle->mutex);
 	}
-	heap_remove(dongle->waiting_pq, coder);
+	heap_remove(dongle->waiting_pq, coder);	
 	pthread_mutex_unlock(&dongle->mutex);
 	return (0);
 }
@@ -43,6 +45,7 @@ static void	release_single_dongle(t_dongle *dongle)
 {
 	pthread_mutex_lock(&dongle->mutex);
 	dongle->last_released_time = get_time_in_ms();
+	dongle->is_held = 0;
 	pthread_cond_broadcast(&dongle->cond);
 	pthread_mutex_unlock(&dongle->mutex);
 }
@@ -61,14 +64,17 @@ int	acquire_dongles(t_coder *coder)
 	}
 	while (!sim_is_stopped(coder->sim))
 	{
+		coder->request_time = get_time_in_ms();
 		if (try_acquire_single_dongle(coder, first))
 		{
-			print_log(coder, "has taken a dongle");
 			if (try_acquire_single_dongle(coder, second))
+			{
+				print_log(coder, "has taken a dongle");
 				return (print_log(coder, "has taken a dongle"), 1);
+			}
 			release_single_dongle(first);
 		}
-		usleep(500);
+		usleep(100);
 	}
 	return (0);
 }
