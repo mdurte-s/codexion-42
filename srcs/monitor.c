@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:52 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 22:04:36 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:22:19 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,16 +40,12 @@ static int	check_coder_status(t_sim *sim, int i, int *all_completed)
 		printf("%lld %d burned out\n", current_time - sim->start_time,
 			sim->coders[i].id);
 		pthread_mutex_unlock(&sim->log_mutex);
-		broadcast_all_dongles(sim);
 		pthread_mutex_unlock(&sim->stop_mutex);
+		broadcast_all_dongles(sim);
 		return (1);
 	}
-	if (sim->number_of_compiles_required != -1)
-	{
-		if (sim->coders[i].compiles_count
-			< sim->number_of_compiles_required)
-			*all_completed = 0;
-	}
+	if (!sim->coders[i].has_finished)
+		*all_completed = 0;
 	pthread_mutex_unlock(&sim->stop_mutex);
 	return (0);
 }
@@ -71,7 +67,7 @@ void	*monitor_routine(void *arg)
 				return (NULL);
 			i++;
 		}
-		if (sim->number_of_compiles_required != -1 && all_completed)
+		if (all_completed)
 		{
 			set_stop_simulation(sim);
 			broadcast_all_dongles(sim);

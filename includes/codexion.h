@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/16 12:33:11 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:20:01 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,6 +51,8 @@ struct					s_coder
 	int					id;
 	pthread_t			thread;
 	int					compiles_count;
+	int					compiles_completed;
+	int					has_finished;
 	long long			last_compile_start;
 	long long			request_time;
 

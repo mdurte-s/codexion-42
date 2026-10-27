@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:18 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:28:34 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:20:28 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ static int	init_coders(t_sim *sim)
 	{
 		sim->coders[i].id = i + 1;
 		sim->coders[i].compiles_count = 0;
+		sim->coders[i].compiles_completed = 0;
+		sim->coders[i].has_finished = 0;
 		sim->coders[i].last_compile_start = sim->start_time;
 		sim->coders[i].request_time = 0;
 		sim->coders[i].sim = sim;

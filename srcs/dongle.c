@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:37 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/16 16:01:50 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/27 18:31:22 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,9 +62,9 @@ int	acquire_dongles(t_coder *coder)
 		first = coder->right_dongle;
 		second = coder->left_dongle;
 	}
+	coder->request_time = get_time_in_ms();
 	while (!sim_is_stopped(coder->sim))
 	{
-		coder->request_time = get_time_in_ms();
 		if (try_acquire_single_dongle(coder, first))
 		{
 			if (try_acquire_single_dongle(coder, second))
