@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:45 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/09 19:29:37 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/28 14:02:08 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,6 @@ int	comp_coders(t_coder *a, t_coder *b, t_scheduler type, t_sim *sim)
 		deadline_b = b->last_compile_start + sim->time_to_burnout;
 		if (deadline_a != deadline_b)
 			return (deadline_a < deadline_b);
-		return (a->id < b->id);
 	}
 	if (a->request_time != b->request_time)
 		return (a->request_time < b->request_time);
