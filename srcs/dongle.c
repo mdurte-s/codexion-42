@@ -6,30 +6,54 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:37 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/28 14:16:44 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/29 12:49:20 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
 
+
+static int	competitor_can_compile(t_coder *competitor, t_dongle *dongle_a)
+{
+	t_dongle	*dongle_b;
+	long long	elapsed_time;
+
+	dongle_b = competitor->left_dongle;
+	if (dongle_a == competitor->left_dongle)
+		dongle_b = competitor->right_dongle;
+	elapsed_time = get_time_in_ms() - dongle_b->last_released_time;
+	if (dongle_b->is_held)
+		return (0);
+	if (elapsed_time < competitor->sim->dongle_cooldown)
+		return (0);
+	return (1);
+}
+
+static int	has_dongle_priority(t_coder *coder, t_dongle *dongle)
+{
+	t_coder	*top;
+
+	top = heap_peek(dongle->waiting_pq);
+	if (!top || top == coder)
+		return (1);
+	if (competitor_can_compile(top, dongle))
+		return (0);
+	return (1);
+}
+
 static int	both_dongles_free(t_coder *coder, t_dongle *first, t_dongle *second)
 {
-	long long	current_time;
-	long long	elapsed_first;
-	long long	elapsed_second;
+	long long	now;
 
-	current_time = get_time_in_ms();
-	elapsed_first = current_time - first->last_released_time;
-	elapsed_second = current_time - second->last_released_time;
-	if (first->is_held
-		|| heap_peek(first->waiting_pq) != coder
-		|| elapsed_first < coder->sim->dongle_cooldown
-		|| second->is_held
-		|| heap_peek(second->waiting_pq) != coder
-		|| elapsed_second < coder->sim->dongle_cooldown)
-	{
+	now = get_time_in_ms();
+	if (first->is_held || second->is_held)
 		return (0);
-	}
+	if ((now - first->last_released_time) < coder->sim->dongle_cooldown)
+		return (0);
+	if ((now - second->last_released_time) < coder->sim->dongle_cooldown)
+		return (0);
+	if (!has_dongle_priority(coder, first) || !has_dongle_priority(coder, second))
+		return (0);
 	return (1);
 }
 
@@ -50,26 +74,6 @@ static int	try_get_dongles(t_coder *coder, t_dongle *first, t_dongle *second)
 	pthread_mutex_unlock(&second->mutex);
 	pthread_mutex_unlock(&first->mutex);
 	return (0);
-}
-
-static void	remove_dongles(t_coder *coder, t_dongle *first, t_dongle *second)
-{
-	pthread_mutex_lock(&first->mutex);
-	pthread_mutex_lock(&second->mutex);
-	heap_remove(first->waiting_pq, coder);
-	heap_remove(second->waiting_pq, coder);
-	pthread_mutex_unlock(&second->mutex);
-	pthread_mutex_unlock(&first->mutex);
-}
-
-static void	push_dongles(t_coder *coder, t_dongle *first, t_dongle *second)
-{
-	pthread_mutex_lock(&first->mutex);
-	pthread_mutex_lock(&second->mutex);
-	heap_push(first->waiting_pq, coder, coder->sim);
-	heap_push(second->waiting_pq, coder, coder->sim);
-	pthread_mutex_unlock(&second->mutex);
-	pthread_mutex_unlock(&first->mutex);
 }
 
 int	get_dongles(t_coder *coder)

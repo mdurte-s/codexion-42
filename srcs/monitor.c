@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:52 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/27 18:22:19 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/28 21:19:24 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@ static int	check_coder_status(t_sim *sim, int i, int *all_completed)
 		> sim->time_to_burnout)
 	{
 		sim->stop_simulation = 1;
+		pthread_mutex_unlock(&sim->stop_mutex);
 		pthread_mutex_lock(&sim->log_mutex);
 		printf("%lld %d burned out\n", current_time - sim->start_time,
 			sim->coders[i].id);
 		pthread_mutex_unlock(&sim->log_mutex);
-		pthread_mutex_unlock(&sim->stop_mutex);
 		broadcast_all_dongles(sim);
 		return (1);
 	}

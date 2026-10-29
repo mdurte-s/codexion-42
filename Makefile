@@ -24,7 +24,8 @@ SRCS	= ${SRCDIR}/coder.c \
 		  ${SRCDIR}/parsing.c \
 		  ${SRCDIR}/scheluder.c \
 		  ${SRCDIR}/heap.c \
-		  ${SRCDIR}/utils.c
+		  ${SRCDIR}/utils.c \
+		  ${SRCDIR}/helpers.c
 
 OBJS		= $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 

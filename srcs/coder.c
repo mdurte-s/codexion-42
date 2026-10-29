@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/28 14:14:12 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/28 21:17:00 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ void	*coder_routine(void *arg)
 	{
 		print_log(coder, "has taken a dongle");
 		while (!sim_is_stopped(coder->sim))
-			;
+			usleep(1000);
 		return (NULL);
 	}
 	if (coder->id % 2 != 0)

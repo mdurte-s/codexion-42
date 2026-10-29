@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/28 14:14:20 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/10/29 12:37:39 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,6 +91,12 @@ int						sim_is_stopped(t_sim *sim);
 void					set_stop_simulation(t_sim *sim);
 void					print_log(t_coder *coder, const char *message);
 void					smart_sleep(long long duration_ms, t_sim *sim);
+
+// Helpers
+void					remove_dongles(t_coder *coder, t_dongle *first,
+							t_dongle *second);
+void					push_dongles(t_coder *coder, t_dongle *first,
+							t_dongle *second);
 
 // Priority Queue / Scheduler
 int						comp_coders(t_coder *a, t_coder *b, t_scheduler type,
