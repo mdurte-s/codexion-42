@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:18 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/11/02 10:43:31 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 12:26:28 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ static int	init_dongles(t_sim *sim)
 	sim->dongles = malloc(sizeof(t_dongle) * sim->number_of_coders);
 	if (!sim->dongles)
 		return (0);
+	memset(sim->dongles, 0, sizeof(t_dongle) * sim->number_of_coders);
 	i = 0;
 	while (i < sim->number_of_coders)
 	{
@@ -41,6 +42,7 @@ static int	init_coders(t_sim *sim)
 	sim->coders = malloc(sizeof(t_coder) * sim->number_of_coders);
 	if (!sim->coders)
 		return (0);
+	memset(sim->coders, 0, sizeof(t_coder) * sim->number_of_coders);
 	i = 0;
 	while (i < sim->number_of_coders)
 	{
