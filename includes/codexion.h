@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:04:55 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/29 12:37:39 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 10:43:14 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ typedef struct s_dongle
 {
 	int					id;
 	pthread_mutex_t		mutex;
-	pthread_cond_t		cond;
 	long long			last_released_time;
 	t_pq				*waiting_pq;
 	int					is_held;

@@ -6,12 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:37 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/29 12:49:20 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 10:48:29 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
 
 static int	competitor_can_compile(t_coder *competitor, t_dongle *dongle_a)
 {
@@ -52,7 +51,8 @@ static int	both_dongles_free(t_coder *coder, t_dongle *first, t_dongle *second)
 		return (0);
 	if ((now - second->last_released_time) < coder->sim->dongle_cooldown)
 		return (0);
-	if (!has_dongle_priority(coder, first) || !has_dongle_priority(coder, second))
+	if (!has_dongle_priority(coder, first)
+		|| !has_dongle_priority(coder, second))
 		return (0);
 	return (1);
 }

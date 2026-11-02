@@ -1,98 +1,93 @@
 *This project has been created as part of the 42 curriculum by mdurte-s.*
 
+# Codexion
+
 ## Description
+**Codexion** is a C multithreading and resource synchronization project that models concurrent developers competing for shared, scarce resources. In a circular co-working hub, $N$ coders alternate between three non-overlapping states: **compiling**, **debugging**, and **refactoring**. 
 
-**Codexion** is a multithreaded simulation project written in C using POSIX threads and mutexes. Inspired by classic concurrency problems like the Dining Philosophers, the simulation models a shared co-working hub where multiple coders compete for limited USB dongles to compile quantum code.
+To compile quantum code, each coder requires simultaneous access to two shared USB dongles (located on their left and right sides). The simulation incorporates complex synchronization rules including mandatory hardware cooldown periods and pluggable request schedulers (**FIFO** and **EDF**) to prevent starvation and deadlocks before any coder suffers from burnout.
 
-Each coder continuously loops through three main states: **compiling**, **debugging**, and **refactoring**. To compile, a coder must hold two adjacent USB dongles (left and right) simultaneously. Access to dongles is managed by strict arbitration policies (**FIFO** or **EDF**) via custom priority queues (Min-Heap), and dongles enforce a **cooldown period** after being released. A dedicated monitor thread ensures that if any coder fails to start compiling within `time_to_burnout` milliseconds, the simulation detects the burnout within 10 ms and terminates safely.
+---
 
 ## Instructions
 
 ### Compilation
-
-The project includes a `Makefile` that compiles the source code with `-Wall -Wextra -Werror` and `-pthread` flags.
+The project includes a `Makefile` supporting standard rules: `all`, `clean`, `fclean`, and `re`. Compile the executable with:
 
 ```bash
-make        # Compiles the codexion executable
-make clean  # Removes object files
-make fclean # Removes object files and the codexion executable
-make re     # Recompiles the entire project
+make
 ```
 
-### Execution
+This compiles all C source files with `-Wall -Wextra -Werror -pthread` flags into the target output `codexion`.
 
-Run the executable with the 8 mandatory positional arguments:
+### Execution
+Run the program with all 8 mandatory positional parameters:
 
 ```bash
 ./codexion <number_of_coders> <time_to_burnout> <time_to_compile> <time_to_debug> <time_to_refactor> <number_of_compiles_required> <dongle_cooldown> <scheduler>
 ```
 
-**Arguments Detail:**
-- **number_of_coders:** Number of coders sitting in a circle and total number of available dongles.
-- **time_to_burnout (ms):** Maximum time allowed since the start of the last compile before a coder burns out.
-- **time_to_compile (ms):** Time required to compile while holding two dongles.
-- **time_to_debug (ms):** Time spent debugging.
-- **time_to_refactor (ms):** Time spent refactoring.
-- **number_of_compiles_required:** Required compiles per coder before simulation stops.
-- **dongle_cooldown (ms):** Time a dongle remains unavailable after being released.
-- **scheduler:** Arbitration policy (`fifo` or `edf`).
+#### Argument Definitions
+* `number_of_coders`: Total number of coder threads and USB dongles.
+* `time_to_burnout`: Max allowed time (ms) between compile starts before burnout.
+* `time_to_compile`: Time (ms) required to hold two dongles and compile.
+* `time_to_debug`: Time (ms) spent debugging after compiling.
+* `time_to_refactor`: Time (ms) spent refactoring after debugging.
+* `number_of_compiles_required`: Stop target for compilations per coder.
+* `dongle_cooldown`: Cooldown duration (ms) for a dongle after release.
+* `scheduler`: Arbitration policy (`fifo` or `edf`).
 
-> **Note:** Ensure plain ASCII text is used for arguments (avoid formatting software converting `fifo` into ligatures like `ﬁfo`).
-
-**Example Usage:**
+#### Example Run
 ```bash
-./codexion 5 3000 200 200 200 10 800 fifo
-./codexion 5 3000 200 200 200 10 800 edf
+./codexion 4 800 200 200 200 5 10 edf
 ```
 
 ---
 
-## Blocking cases handled
+## Blocking Cases Handled
 
-This section details all the concurrency and synchronization challenges addressed in the simulation:
-
-1. **Deadlock Prevention & Coffman's Conditions:**
-   - **Resource Ordering:** To break circular wait, coders always attempt to acquire the lower dongle ID first (`min(left, right)`) before requesting the higher ID.
-   - **Hold-and-Wait Elimination:** If a coder successfully acquires the first dongle but fails to get the second immediately, it releases the first dongle and backs off (`usleep`) before retrying.
-2. **Starvation Prevention & Fair Arbitration:**
-   - Dongle request queues use custom priority queues (Min-Heap) to guarantee structured access without starvation.
-   - **FIFO:** Serves requests strictly in order of arrival (`request_time`).
-   - **EDF:** Serves the coder with the earliest burnout deadline (`last_compile_start + time_to_burnout`). Equal deadlines use coder ID as a deterministic tie-breaker.
-3. **Cooldown Handling:**
-   - Released dongles maintain a `last_released_time` timestamp. Ownership is granted only when `current_time - last_released_time >= dongle_cooldown`.
-4. **Precise Burnout Detection:**
-   - A dedicated monitor thread polls coder state. If a burnout occurs, it sets the global stop flag, prints the burnout log within 10 ms of occurrence, and broadcasts to all condition variables to unblock all worker threads.
-5. **Log Serialization:**
-   - All state transitions are logged through a dedicated `log_mutex` to prevent interleaved lines.
-6. **Single Coder Scenario:**
-   - Handled as an edge case where a single coder acquires the single available dongle and waits until the monitor thread cleanly detects burnout.
+* **Deadlock Prevention & Mutex Ordering:** 
+  To eliminate circular wait (one of Coffman's conditions), dongle locking order is strictly enforced by lowest ID first (`first->id > second->id` swap) before acquiring mutex locks across paired dongles in `get_dongles()` and `push_dongles()`.
+* **Resource Cooldown Management:** 
+  Dongles track their last release timestamp (`last_released_time`). Resource acquisition (`try_get_dongles()`) verifies that both requested dongles have fulfilled their cooldown duration before allocation.
+* **Starvation Prevention & Scheduling:** 
+  Requests are organized using custom binary min-heap priority queues per dongle (`waiting_pq`). 
+  * `fifo`: Serves coders in order of acquisition request timestamp (`request_time`).
+  * `edf`: Prioritizes coders with the earliest burnout deadline ($last\_compile\_start + time\_to\_burnout$), falling back on request timestamp and ID tie-breakers.
+* **Precise Burnout Detection:** 
+  A dedicated monitor thread checks all coders periodically. If a coder exceeds `time_to_burnout`, the simulation triggers burnout termination, logs the event immediately within the mandatory <10 ms threshold, and signals all waiting threads.
+* **Serialized Atomic Logging:** 
+  All state transitions are routed through `print_log()` protected by `log_mutex` to prevent line interleaving and ensure log integrity after simulation shutdown.
 
 ---
 
-## Thread synchronization mechanisms
+## Thread Synchronization Mechanisms
 
-This implementation leverages the following POSIX threading primitives to coordinate access to shared resources:
-
-* **`pthread_mutex_t`:**
-  * **Dongle Mutexes (`dongle->mutex`):** Protect individual dongle states, arbitration priority queues, and cooldown timestamps.
-  * **Stop Mutex (`sim->stop_mutex`):** Protects thread-safe reads and writes of the `stop_simulation` flag and shared coder timestamps.
-  * **Log Mutex (`sim->log_mutex`):** Ensures atomic console output and prevents line interleaving.
-* **`pthread_cond_t`:**
-  * **Dongle Condition Variables (`dongle->cond`):** Signal waiting coders when a dongle is released or when a broadcast is triggered by the monitor upon simulation teardown.
-* **Custom Min-Heap Priority Queue:**
-  * Custom array-based priority queue providing $O(\log N)$ queue management per dongle to enforce FIFO and EDF arbitration deterministically without external library dependencies.
+* **`pthread_mutex_t`**:
+  * **Dongle Mutexes (`dongle.mutex`)**: Protect individual dongle ownership, status flags (`is_held`), and waiting queues (`waiting_pq`).
+  * **Simulation Lock (`stop_mutex`)**: Synchronizes access to `stop_simulation` state, compile counts, and timestamp updates between coder threads and the monitor.
+  * **Logging Lock (`log_mutex`)**: Ensures thread-safe output formatting.
+* **Mutex-based coordination and polling**:
+  * **Dongle Mutexes (`dongle.mutex`)**: Protect individual dongle ownership, release state, and queue integrity while requests are checked and granted.
+  * **Simulation Lock (`stop_mutex`)**: Synchronizes access to the simulation stop flag, burnout checks, and compile counters between coder threads and the monitor.
+  * **Logging Lock (`log_mutex`)**: Serializes log writes to guarantee atomic output and avoid interleaved messages.
+  * Coders use safe polling loops with `smart_sleep()` instead of condition variables, repeatedly checking whether both dongles are available or the simulation has stopped.
+* **Custom Heap Priority Queue (`t_pq`)**:
+  * Implemented from scratch without standard libraries to handle dynamic arbitration under `fifo` and `edf` policies.
+* **Monitor-Coder Coordination:**
+  * Coders perform safe, granular polling delays (`smart_sleep()`) while continuously monitoring simulation termination flags to allow rapid thread join operations upon shutdown.
 
 ---
 
 ## Resources
 
-### Documentation & References
-- POSIX Threads Programming (LLNL Tutorial)
-- Operating System Concepts (Silberschatz, Galvin, Gagne) – Concurrency, Mutexes, and Deadlocks
-- Earliest Deadline First (EDF) Scheduling Algorithms Overview
+### References
+* [POSIX Threads Programming (LLNL Tutorial)](https://hpc-tutorials.llnl.gov/posix/)
+* [Earliest Deadline First Scheduling Algorithm](https://en.wikipedia.org/wiki/Earliest_deadline_first_scheduling)
+* [Coffman Conditions and Deadlock Prevention](https://en.wikipedia.org/wiki/Deadlock)
 
-### AI Usage Disclosure
-In accordance with 42 curriculum requirements, AI assistance was utilized during this project for the following tasks:
-- **Architecture Review:** Brainstorming edge-case handling (e.g., deadlock prevention via ID ordering and condition variable broadcasts during teardown).
-- **Test Suite Development:** Generating automated bash scripting logic to evaluate argument parsing, burnout timing precision, and logging constraints.
-All AI-generated suggestions were manually implemented, verified, and integrated with full understanding.
+### AI Usage
+AI tools (Large Language Models) were utilized during the project as follows:
+* **Architecture & Algorithm Design:** Assisting in structural layout for binary min-heap operations and priority arbitration rules.
+* **Documentation & README:** Structuring and drafting comprehensive documentation in compliance with the 42 subject requirements.
+* **Edge Case Analysis:** Brainstorming potential concurrency pitfalls such as cooldown race conditions and deadline tie-breaking mechanisms.

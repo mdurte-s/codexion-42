@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:18 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/27 21:10:08 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 10:43:31 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,6 @@ static int	init_dongles(t_sim *sim)
 		sim->dongles[i].id = i + 1;
 		sim->dongles[i].last_released_time = 0;
 		pthread_mutex_init(&sim->dongles[i].mutex, NULL);
-		pthread_cond_init(&sim->dongles[i].cond, NULL);
 		sim->dongles[i].waiting_pq
 			= create_priority_queue(sim->number_of_coders);
 		if (!sim->dongles[i].waiting_pq)
@@ -80,7 +79,6 @@ void	cleanup_simulation(t_sim *sim)
 		while (i < sim->number_of_coders)
 		{
 			pthread_mutex_destroy(&sim->dongles[i].mutex);
-			pthread_cond_destroy(&sim->dongles[i].cond);
 			free_priority_queue(sim->dongles[i].waiting_pq);
 			i++;
 		}

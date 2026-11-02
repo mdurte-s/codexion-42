@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/28 21:17:00 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 10:43:22 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,6 @@ static void	release_single_dongle(t_dongle *dongle)
 	pthread_mutex_lock(&dongle->mutex);
 	dongle->last_released_time = get_time_in_ms();
 	dongle->is_held = 0;
-	pthread_cond_broadcast(&dongle->cond);
 	pthread_mutex_unlock(&dongle->mutex);
 }
 

@@ -6,25 +6,11 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:52 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/10/28 21:19:24 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/02 10:48:38 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/codexion.h"
-
-static void	broadcast_all_dongles(t_sim *sim)
-{
-	int	i;
-
-	i = 0;
-	while (i < sim->number_of_coders)
-	{
-		pthread_mutex_lock(&sim->dongles[i].mutex);
-		pthread_cond_broadcast(&sim->dongles[i].cond);
-		pthread_mutex_unlock(&sim->dongles[i].mutex);
-		i++;
-	}
-}
 
 static int	check_coder_status(t_sim *sim, int i, int *all_completed)
 {
@@ -41,7 +27,6 @@ static int	check_coder_status(t_sim *sim, int i, int *all_completed)
 		printf("%lld %d burned out\n", current_time - sim->start_time,
 			sim->coders[i].id);
 		pthread_mutex_unlock(&sim->log_mutex);
-		broadcast_all_dongles(sim);
 		return (1);
 	}
 	if (!sim->coders[i].has_finished)
@@ -70,7 +55,6 @@ void	*monitor_routine(void *arg)
 		if (all_completed)
 		{
 			set_stop_simulation(sim);
-			broadcast_all_dongles(sim);
 			return (NULL);
 		}
 		usleep(1000);
