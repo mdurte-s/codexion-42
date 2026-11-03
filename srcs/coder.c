@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:24 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/11/02 10:43:22 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/03 14:08:46 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,27 @@ static void	release_dongles(t_coder *coder)
 	release_single_dongle(coder->right_dongle);
 }
 
+static int	check_coder_status(t_coder *coder)
+{
+	int	finish;
+
+	finish = 0;
+	pthread_mutex_lock(&coder->sim->stop_mutex);
+	if (coder->sim->number_of_compiles_required == 0)
+	{
+		coder->has_finished = 1;
+		finish = 1;
+	}
+	else if (coder->compiles_count == coder->sim->number_of_compiles_required)
+		coder->has_finished = 1;
+	pthread_mutex_unlock(&coder->sim->stop_mutex);
+	return (finish);
+}
+
 static int	coder_cycle(t_coder *coder)
 {
+	if (check_coder_status(coder) == 1)
+		return (1);
 	if (!get_dongles(coder))
 		return (0);
 	pthread_mutex_lock(&coder->sim->stop_mutex);
@@ -36,10 +55,7 @@ static int	coder_cycle(t_coder *coder)
 	pthread_mutex_unlock(&coder->sim->stop_mutex);
 	print_log(coder, "is compiling");
 	smart_sleep(coder->sim->time_to_compile, coder->sim);
-	pthread_mutex_lock(&coder->sim->stop_mutex);
-	if (coder->compiles_count == coder->sim->number_of_compiles_required)
-		coder->has_finished = 1;
-	pthread_mutex_unlock(&coder->sim->stop_mutex);
+	check_coder_status(coder);
 	release_dongles(coder);
 	if (sim_is_stopped(coder->sim))
 		return (0);

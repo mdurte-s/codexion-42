@@ -6,7 +6,7 @@
 /*   By: mdurte-s <mdurte-s@student.42porto.com>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/08/17 15:42:14 by mdurte-s          #+#    #+#             */
-/*   Updated: 2026/09/10 11:23:13 by mdurte-s         ###   ########.fr       */
+/*   Updated: 2026/11/03 13:38:20 by mdurte-s         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,8 +80,6 @@ int	parser(int argc, char **argv, t_sim *sim)
 	{
 		value = ft_atoi_adapted(argv[i]);
 		if (value < 0)
-			return (1);
-		if ((i == 1 || i == 2 || i == 6) && value == 0)
 			return (1);
 		save_data(i, value, sim);
 	}
